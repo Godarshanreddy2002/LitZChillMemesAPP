@@ -1,0 +1,15 @@
+{
+    "imports": {
+        "@shared/": "./_shared/",
+        "@handler/": "./_handler/",
+        "@repository/": "./_repository/",
+        "@model/": "./_model/",
+        "@response/": "./_responses/",
+        "@middleware/": "./_middleware/",
+        "@routes/": "./_routes/",
+ 
+ 
+        "@supabase": "npm:@supabase/supabase-js",
+        "@V4": "https://deno.land/x/uuid@v0.1.2/mod.ts"
+    }
+}
