@@ -220,7 +220,8 @@ export async function getFollowers(user_id: string): Promise<{ data: any, error:
   const { data, error } = await supabase
     .from('followers') 
     .select(`*,users(first_name)`) 
-    .eq('user_id', user_id);  
+    .eq('user_id', user_id)
+    .range(0, 10);  
   
   return { data, error };
 }
