@@ -42,14 +42,14 @@ export default async function fetchFollower(req: Request, params: Record<string,
 
         // Step 4: If no followers found, return an error response
         if (!data) {
-            return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, `Followers not found`);
+            return ErrorResponse(HTTP_STATUS_CODE.NOT_FOUND, `Followers not found`);
         }
 
-        // Debug: Log the followers data for inspection
-        console.log(data);
-        if(data.length == 0) {
-            return SuccessResponse("No followers in page Number: "+page, HTTP_STATUS_CODE.OK, data);
-        }
+        // Step 4: If no followers found in the give page return an error response
+        // console.log(data);
+        // if(data.length == 0) {
+        //     return SuccessResponse("No followers in page Number: "+page, HTTP_STATUS_CODE.NO_CONTENT, data);
+        // }
         // Step 5: Return the list of followers if found in a success response
         return SuccessResponse("Followers found", HTTP_STATUS_CODE.OK, data);
         

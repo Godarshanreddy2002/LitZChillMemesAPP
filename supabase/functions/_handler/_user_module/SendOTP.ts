@@ -3,10 +3,11 @@ import { USERMODULE } from "@shared/_messages/userModuleMessages.ts";
 import { HTTP_STATUS_CODE } from "@shared/_constants/HttpStatusCodes.ts";
 import { SuccessResponse } from "@response/Response.ts";
 import ErrorResponse from "@response/Response.ts";
-import { getUser, getUserOtpDetails, updateOtpLimitTable } from "@repository/_user_repo/UserRepository.ts";
+import { countOtpRequests, getOtpSettings, getUser, getUserOtpDetails, updateOtpLimitTable } from "@repository/_user_repo/UserRepository.ts";
 import { isPhoneAvailable } from "@shared/_validation/UserValidate.ts";
 import { LOGERROR, LOGINFO } from "@shared/_messages/userModuleMessages.ts";
 import Logger from "@shared/_logger/Logger.ts";
+import supabase from "@shared/_config/DbConfig.ts";
 
 const logger = Logger.getInstance();
 
@@ -36,6 +37,10 @@ export default async function signInWithOtp(req: Request): Promise<Response> {
             return phoneNoIsnotThere;
         }
 
+
+
+
+
         // Fetch user details using the phone number
         const { data: user, error: userError } = await getUser(phoneNo);
         if (userError) {
@@ -54,6 +59,31 @@ export default async function signInWithOtp(req: Request): Promise<Response> {
                     HTTP_STATUS_CODE.FORBIDDEN,
                     `${USERMODULE.ACCOUNT_DEACTIVATED} Try after ${user.lockout_time}`
                 );
+            }
+            
+            const {data,error:getOtpSettingError}=await getOtpSettings();
+            if(getOtpSettingError)
+            {
+                return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR,"Somthing went wrong in getting"+getOtpSettingError.message)
+            }  
+            if(data)        
+            {
+                const _max_Otp_count=data.max_otp_attempts;
+                const _time_unit:string=data.time_unit;
+                const _time_units_count_time_unit:string=data.time_units_count;                
+            }
+
+            const start_time: Date = new Date(new Date().getTime() - 60 * 60 * 1000) // Default to current time
+            const end_time: Date = new Date() // Default to current time
+            const {count,error}=await countOtpRequests(user.user_id,start_time,end_time);
+
+            if(error)
+            {
+                return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR,"some thing went wrong"+error.message,)
+            }
+            if(count)
+            {
+                
             }
 
             logger.log(LOGINFO.USER_NOT_LOCKED_OUT.replace("{phoneNo}", phoneNo));

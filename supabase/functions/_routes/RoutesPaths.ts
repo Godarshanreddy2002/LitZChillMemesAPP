@@ -8,7 +8,8 @@ export const USER_MODULE_ROUTES = {
     USER_LOGOUT: "/UserModule/LogOut/:scope",
     ADD_FOLLOWER:"/UserModule/addDFollower/:id",
     FETCH_FOLLOWERS:"/UserModule/fetchFollowers",
-    UPDATE_PHOTO:"/UserModule/UpdatePhoto/:id/:profile"
+    UPDATE_PHOTO:"/UserModule/UpdatePhoto/:id/:profile",
+    UPDATE_OTP_SETTINGS:"/UserModule/UpdateOTPSettings/:id"
   };
 //Meme Module Routes Path
 export const MEME_ROUTES ={

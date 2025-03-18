@@ -1,5 +1,5 @@
 import { otpVerication } from "@repository/_user_repo/AuthRepo.ts";
-import { createOtpLimitTable, getUser, RegisterUser } from "@repository/_user_repo/UserRepository.ts";
+import { addOTPEntry, createOtpLimitTable, getUser, RegisterUser } from "@repository/_user_repo/UserRepository.ts";
 import { makeUserLockout } from "@repository/_user_repo/UserRepository.ts";
 import { USERMODULE } from "@shared/_messages/userModuleMessages.ts";
 import { HTTP_STATUS_CODE } from "@shared/_constants/HttpStatusCodes.ts";
@@ -8,6 +8,7 @@ import { isOtpAvailable, isPhoneAvailable } from "@shared/_validation/UserValida
 import { LOGERROR } from "@shared/_messages/userModuleMessages.ts";
 import { LOGINFO } from "@shared/_messages/userModuleMessages.ts";
 import Logger from "@shared/_logger/Logger.ts";
+import supabase from "@shared/_config/DbConfig.ts";
 
 const logger = Logger.getInstance();
 
@@ -109,14 +110,14 @@ export default async function verifyOtp(req: Request): Promise<Response> {
                 logger.error(LOGERROR.USER_UPDATE_ERROR + updateError);
                 return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, `${updateError.message}`);
             }
-
+            
             const userId = data.user?.id;
             const access_token = data.session?.access_token;
             if (userId && access_token) {
                 logger.log(LOGINFO.USER_LOGGED_IN);
                 return SuccessResponse(USERMODULE.USER_VERIFIED, HTTP_STATUS_CODE.OK, { userId, access_token });
             }
-
+            
             return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, USERMODULE.INTERNAL_SERVER_ERROR);
         }
 
@@ -133,7 +134,7 @@ export default async function verifyOtp(req: Request): Promise<Response> {
                     return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, `${USERMODULE.INTERNAL_SERVER_ERROR}`);
                 }
 
-                const { data: _CreateOtpDetails, error: createOtpDetailError } = await createOtpLimitTable(userId);
+                const { data: _CreateOtpDetails, error: createOtpDetailError } = await addOTPEntry(userId);
                 if (createOtpDetailError) {
                     logger.error(LOGERROR.USER_REGISTRATION_ERROR + createOtpDetailError.message);
                     return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, `${USERMODULE.INTERNAL_SERVER_ERROR}`);

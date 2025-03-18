@@ -45,7 +45,8 @@ export const USERMODULE = {
     OTP_LIMIT_EXCEDED:"Your Otp Limit is exceded for today Try again tomorrow",
     OTP_LIMIT_FOR_FIVE_MINUTE:"Try After five minute",
     OTPDETAILS_NOT_FOUND:"OTP details not found in otp_limit table",
-    PHOTO_UPLOAD_FAILED: "Failed to upload the photo. Please try again."
+    PHOTO_UPLOAD_FAILED: "Failed to upload the photo. Please try again.",
+    OTP_SETTINGS_UPDATE_SUCCESSE:"OTP settings updated succeessfully"
 };
 export const CONSTANTS = {
     COUNTRY_CODE: "+91",

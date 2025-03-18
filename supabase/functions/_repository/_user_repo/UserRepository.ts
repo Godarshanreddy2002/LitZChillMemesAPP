@@ -119,6 +119,8 @@ export async function createOtpLimitTable(user_id: string) :Promise<{data:any,er
   return { data, error }
 }
 
+
+
 /**
  * This method is used to deactivate account by user_id
  * @param user_Id --It is user user_id of type string(uuid)
@@ -355,4 +357,55 @@ async function generateFileHash(file: File): Promise<string> {
   const hashArray = Array.from(new Uint8Array(hashBuffer)); // Convert buffer to byte array
   const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, "0")).join(""); // Convert byte array to hex string
   return hashHex;
+}
+
+
+
+
+
+
+export async function updateOtpLimitSettings(time_units:string,time_units_count:number,max_OTP:number):Promise<{data:any,error:any}>
+{
+  const {data,error} =await supabase
+  .from('otp_settings')
+  .upsert([
+    {
+      "time_unit":time_units,
+      "time_units_count":time_units_count,
+      "max_otp_attempts":max_OTP
+    }])
+    .select();
+    return {data,error}
+}
+
+
+
+export async function addOTPEntry(user_id:string)
+{
+  const {data,error}=await supabase
+  .from('otp_requests')
+  .insert([{
+    'requested_at':new Date(),
+    'user_id':user_id
+  }])
+  .single();
+
+  return {data,error};
+}
+
+
+export async function countOtpRequests(user_id: string, start_time: Date, end_time: Date) {
+  const { count, error } = await supabase
+    .from("otp_requests")
+    .select("*", { count: "exact", head: true }) // Get only count
+    .eq("user_id", user_id)
+    .gte("requested_at", start_time) // Filter from start time
+    .lte("requested_at", end_time); // Filter up to end time
+
+  return { count, error };
+}
+
+export async function getOtpSettings() {
+  const { data, error } = await supabase.from("otp_settings").select("*").single();
+  return {data,error}
 }
