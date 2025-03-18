@@ -22,16 +22,18 @@ export default async function fetchFollower(req: Request, params: Record<string,
 
 
         const url = new URL(req.url);
-        const page = url.searchParams.get("page")||"0";
-        const size = url.searchParams.get("size")||"10";
+        const page = parseInt(url.searchParams.get("page")||"0");
+        const size = parseInt(url.searchParams.get("size")||"10");
 
+        
         //convert page and size into number
-        const pageNo = parseInt(page);
-        const pageSize = parseInt(size);
+
+        const start = (page - 1) * size;
+        const end = start + size - 1;
         
         
         // Step 2: Fetch followers using the repository method
-        const { data, error } = await getFollowers(user_id,pageNo,pageSize);
+        const { data, error } = await getFollowers(user_id,start,end);
 
         // Step 3: Handle any errors encountered during the data fetching process
         if (error) {
@@ -45,7 +47,9 @@ export default async function fetchFollower(req: Request, params: Record<string,
 
         // Debug: Log the followers data for inspection
         console.log(data);
-
+        if(data.length == 0) {
+            return SuccessResponse("No followers in page Number: "+page, HTTP_STATUS_CODE.OK, data);
+        }
         // Step 5: Return the list of followers if found in a success response
         return SuccessResponse("Followers found", HTTP_STATUS_CODE.OK, data);
         

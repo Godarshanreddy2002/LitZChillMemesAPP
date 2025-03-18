@@ -220,7 +220,7 @@ export async function getFollowers(user_id: string,page:number,size:number): Pro
     .select(`*,users(first_name)`) 
     .eq('user_id', user_id)
     .range(page,size)
-    .limit(size);  
+    // .limit(size);  
   
   return { data, error };
 }
