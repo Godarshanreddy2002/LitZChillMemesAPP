@@ -30,8 +30,7 @@ export async function updateOTPSettings(req: Request, _params: Record<string, st
         // currentTime.setMinutes(currentTime.getMinutes() + minutes);
         // currentTime.setDate(currentTime.getDate() + days);
 
-        const {data,error} =await updateOtpLimitSettings(time_units,time_units_count,max_OTP );
-
+        const {data,error} =await updateOtpLimitSettings(time_units,time_units_count,max_OTP,5);
         if(error)
         {
             console.log("error at updating ",error.message)

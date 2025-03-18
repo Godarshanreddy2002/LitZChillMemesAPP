@@ -48,8 +48,10 @@ export default async function signInWithOtp(req: Request): Promise<Response> {
             logger.error(LOGERROR.USER_NOT_FOUND + userError.message);
             return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, `${userError.message}`);
         }
-
+        // console.log(user.user_id+"-------------"+userError)
+        
         if (user) {
+            console.log("Start of getting Otp setting Data---------------")
             const currentTime = new Date().toISOString();
 
             // Check if the user is currently in lockout time
@@ -60,7 +62,7 @@ export default async function signInWithOtp(req: Request): Promise<Response> {
                     `${USERMODULE.ACCOUNT_DEACTIVATED} Try after ${user.lockout_time}`
                 );
             }
-            
+            console.log("Start of getting Otp setting Data---------------")
             const {data,error:getOtpSettingError}=await getOtpSettings();
             if(getOtpSettingError)
             {
@@ -68,45 +70,57 @@ export default async function signInWithOtp(req: Request): Promise<Response> {
             }  
             if(data)        
             {
-                const _max_Otp_count=data.max_otp_attempts;
-                const _time_unit:string=data.time_unit;
-                const _time_units_count_time_unit:string=data.time_units_count;    
-                
-                
-            }
+                const time=new Date();
+                const max_Otp_count=data.max_otp_attempts;
+                const time_unit:string=data.time_unit;
+                const time_units_count:number=data.time_units_count;    
+                console.log("current time"+time);
+                if(time_unit=="days")
+                {
+                    time.setDate(time.getDate() - time_units_count);
+                }
 
-            const start_time: Date = new Date(new Date().getTime() - 60 * 60 * 1000) // Default to current time
-            const end_time: Date = new Date() // Default to current time
-            const {count,error}=await countOtpRequests(user.user_id,start_time,end_time);
+                else if (time_unit === "hours") {
+                    time.setHours(time.getHours() - time_units_count);
+                } else if (time_unit === "min") {
+                    time.setMinutes(time.getMinutes() - time_units_count);
+                }
+                console.log("start time "+time)
+                const start_time=time;
+                const end_time: Date = new Date();
 
-            if(error)
-            {
-                return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR,"some thing went wrong"+error.message,)
+                const {count,error}=await countOtpRequests(user.user_id,start_time,end_time);
+                console.log("count----------"+count);
+                if(error)
+                {
+                    return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR,"some thing went wrong"+error.message,)
+                }
+                if(count&&count>=max_Otp_count)
+                {
+                    return ErrorResponse(HTTP_STATUS_CODE.CONFLICT,"You have reached maximum otp limit")
+                }
             }
-            if(count)
-            {
-                
-            }
+            
 
             logger.log(LOGINFO.USER_NOT_LOCKED_OUT.replace("{phoneNo}", phoneNo));
 
-            // Fetch OTP details for the user
-            const { data: otpData, error: otpError } = await getUserOtpDetails(user.user_id);
-            if (otpError) {
-                // Log error if there is an issue with the OTP details
-                logger.error(LOGERROR.USER_OTP_TABLE_ERROR + otpError.message);
-                return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, `${otpError.message}`);
-            }
+            // // Fetch OTP details for the user
+            // const { data: otpData, error: otpError } = await getUserOtpDetails(user.user_id);
+            // if (otpError) {
+            //     // Log error if there is an issue with the OTP details
+            //     logger.error(LOGERROR.USER_OTP_TABLE_ERROR + otpError.message);
+            //     return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, `${otpError.message}`);
+            // }
 
-            // Check if OTP limits have been exceeded
-            if (otpData.total_otps_per_day >= 15) {
-                return ErrorResponse(HTTP_STATUS_CODE.FORBIDDEN, USERMODULE.OTP_LIMIT_EXCEDED);
-            }
-            if (otpData.total_otps_last_5_min >= 3) {
-                return ErrorResponse(HTTP_STATUS_CODE.FORBIDDEN, USERMODULE.OTP_LIMIT_FOR_FIVE_MINUTE);
-            }
+            // // Check if OTP limits have been exceeded
+            // if (otpData.total_otps_per_day >= 15) {
+            //     return ErrorResponse(HTTP_STATUS_CODE.FORBIDDEN, USERMODULE.OTP_LIMIT_EXCEDED);
+            // }
+            // if (otpData.total_otps_last_5_min >= 3) {
+            //     return ErrorResponse(HTTP_STATUS_CODE.FORBIDDEN, USERMODULE.OTP_LIMIT_FOR_FIVE_MINUTE);
+            // }
         }
-
+     
         // Attempt to send OTP
         const { data: _data, error } = await sendOtp(phoneNo);
 

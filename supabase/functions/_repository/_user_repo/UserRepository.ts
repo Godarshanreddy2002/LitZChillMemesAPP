@@ -31,7 +31,7 @@ export async function getUser(phoneNo: string) :Promise<{data:any,error:any}>{
     .from(TABLE_NAMES.USER_TABLE)
     .select("*")
     .eq(USER_TABLE_FIELDS.MOBILE, phoneNo)  // .or(`lockout_time.lt.${new Date().toISOString()},lockout_time.is.null`)
-     .maybeSingle();
+    .maybeSingle();
     return { data, error };
    
    
@@ -364,16 +364,17 @@ async function generateFileHash(file: File): Promise<string> {
 
 
 
-export async function updateOtpLimitSettings(time_units:string,time_units_count:number,max_OTP:number):Promise<{data:any,error:any}>
+export async function updateOtpLimitSettings(time_units:string,time_units_count:number,max_OTP:number,id:number):Promise<{data:any,error:any}>
 {
   const {data,error} =await supabase
   .from('otp_settings')
-  .upsert([
+  .update([
     {
       "time_unit":time_units,
       "time_units_count":time_units_count,
       "max_otp_attempts":max_OTP
     }])
+    .eq("id",id)
     .select();
     return {data,error}
 }
@@ -400,12 +401,19 @@ export async function countOtpRequests(user_id: string, start_time: Date, end_ti
     .select("*", { count: "exact", head: true }) // Get only count
     .eq("user_id", user_id)
     .gte("requested_at", start_time) // Filter from start time
-    .lte("requested_at", end_time); // Filter up to end time
-
+    .lte("requested_at", end_time).single(); // Filter up to end time
+console.log("data"+count+" error:"+error)
   return { count, error };
 }
 
 export async function getOtpSettings() {
-  const { data, error } = await supabase.from("otp_settings").select("*").single();
+  const { data, error } = await supabase
+  .from("otp_settings")
+  .select("*")
+  .eq('id',4)
+  .single();
+
+  console.log(data);
   return {data,error}
+
 }
