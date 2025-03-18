@@ -144,8 +144,6 @@ export async function updateUserProfilePhoto(user_Id: string,photoUrl:string) :P
     return { data, error };
 }
 
-
-
 /**
  * This method is used to update total_otps_last_5_min limit to 0
  */
@@ -216,12 +214,13 @@ export async function updateFollowerCount(user_id:string,follower_count:number)
     return {data,error}
 }
 
-export async function getFollowers(user_id: string): Promise<{ data: any, error: any }> {
+export async function getFollowers(user_id: string,page:number,size:number): Promise<{ data: any, error: any }> {
   const { data, error } = await supabase
     .from('followers') 
     .select(`*,users(first_name)`) 
     .eq('user_id', user_id)
-    .range(0, 10);  
+    .range(page,size)
+    .limit(size);  
   
   return { data, error };
 }

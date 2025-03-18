@@ -15,13 +15,23 @@ import { HTTP_STATUS_CODE } from "@shared/_constants/HttpStatusCodes.ts";
  * @param params - A record containing user-specific data, including `user_id` for which followers are being fetched.
  * @returns - A JSON response containing the list of followers if found, or an error message.
  */
-export default async function fetchFollower(_req: Request, params: Record<string, string>): Promise<Response> {
+export default async function fetchFollower(req: Request, params: Record<string, string>): Promise<Response> {
     try {
         // Step 1: Extract user_id from the request parameters
         const user_id = params.user_id;
 
+
+        const url = new URL(req.url);
+        const page = url.searchParams.get("page")||"0";
+        const size = url.searchParams.get("size")||"10";
+
+        //convert page and size into number
+        const pageNo = parseInt(page);
+        const pageSize = parseInt(size);
+        
+        
         // Step 2: Fetch followers using the repository method
-        const { data, error } = await getFollowers(user_id);
+        const { data, error } = await getFollowers(user_id,pageNo,pageSize);
 
         // Step 3: Handle any errors encountered during the data fetching process
         if (error) {
