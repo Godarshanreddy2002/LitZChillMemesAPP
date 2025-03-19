@@ -36,11 +36,12 @@ export const USER_TABLE_FIELDS = {
     TOTAL_OTPS_PER_DAY: 'total_otps_per_day',
     TOTAL_OTPS_LAST_5_MIN: 'total_otps_last_5_min',
     LAST_UPDATED: 'last_updated',
+    CRITERIA_STATUS:'criteria_status'
   };
 
 
   export const OTP_REQUEST_TABLE_FIELDS = {
-    USER_ID: 'user_id',
+    PHONE_NUMBER: 'phone_number',
     OTP_REQUESTED_AT: 'requested_at',
   };
 
@@ -50,4 +51,5 @@ export const USER_TABLE_FIELDS = {
     TIME_UNITS_COUNT: 'time_units_count',
     MAX_OTP_ATTEMPTS: 'max_otp_attempts',
     LAST_UPDATED: 'last_updated',
+    CEITERIA_STATUS: 'criteria_status',
   };

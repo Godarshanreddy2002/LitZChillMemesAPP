@@ -4,7 +4,7 @@ import { HTTP_STATUS_CODE } from "@shared/_constants/HttpStatusCodes.ts";
 import { SuccessResponse } from "@response/Response.ts";
 import ErrorResponse from "@response/Response.ts";
 import { countOtpRequests, getOtpSettings, getUser, insertOtpRequest } from "@repository/_user_repo/UserRepository.ts";
-import {  isPhoneValid } from "@shared/_validation/UserValidate.ts";
+import { isPhoneValid, validateUserOTPLimit } from "@shared/_validation/UserValidate.ts";
 import { LOGERROR, LOGINFO } from "@shared/_messages/userModuleMessages.ts";
 import Logger from "@shared/_logger/Logger.ts";
 import supabase from "@shared/_config/DbConfig.ts";
@@ -37,11 +37,6 @@ export default async function signInWithOtp(req: Request): Promise<Response> {
         if (phoneNoIsnotThere instanceof Response) {
             return phoneNoIsnotThere;
         }
-
-
-
-
-
         // Fetch user details using the phone number
         const { data: user, error: userError } = await getUser(phoneNo);
         if (userError) {
@@ -49,83 +44,42 @@ export default async function signInWithOtp(req: Request): Promise<Response> {
             logger.error(LOGERROR.USER_NOT_FOUND + userError.message);
             return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, `${userError.message}`);
         }
-        
-        
-        if (user) {
-            console.log("Start of getting Otp setting Data---------------")
-            const currentTime = new Date().toISOString();
 
-            // Check if the user is currently in lockout time
-            if (user.lockout_time && user.lockout_time > currentTime) {
-                logger.log(LOGINFO.USER_FOUND.replace("{phoneNo}", phoneNo));
-                return ErrorResponse(
-                    HTTP_STATUS_CODE.FORBIDDEN,
-                    `${USERMODULE.ACCOUNT_DEACTIVATED} Try after ${user.lockout_time}`
-                );
-            }
-            console.log("Start of getting Otp setting Data---------------")
-            const {data,error:getOtpSettingError}=await getOtpSettings();
-            if(getOtpSettingError)
-            {
-                return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR,USERMODULE.INTERNAL_SERVER_ERROR+getOtpSettingError.message)
-            }  
-            if(data)        
-            {
-                const time=new Date();
-                const max_Otp_count=data.max_otp_attempts;
-                const time_unit:string=data.time_unit;// days or hours
-                const time_units_count:number=data.time_units_count;  //2 hours or 2 min   
-                console.log("current time"+time);
-                if(time_unit=="days")
-                {
-                    time.setDate(time.getDate() - time_units_count);
-                }
+        const currentTime = new Date().toISOString();
 
-                else if (time_unit === "hours") {
-                    time.setHours(time.getHours() - time_units_count);
-                } else if (time_unit === "min") {
-                    time.setMinutes(time.getMinutes() - time_units_count);
-                }
-                console.log("start time "+time)
-                const start_time=time;
-                const end_time: Date = new Date();
-
-                const {count,error}=await countOtpRequests(user.user_id,start_time,end_time);
-                console.log("count----------"+count);
-                if(error)
-                {
-                    return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR,"some thing went wrong"+error.message,)
-                }
-                if(count&&count>=max_Otp_count) 
-                {
-                    return ErrorResponse(HTTP_STATUS_CODE.CONFLICT,"You have reached maximum otp limit")
-                }
-            }
-
-
-            logger.log(LOGINFO.USER_NOT_LOCKED_OUT.replace("{phoneNo}", phoneNo));
+        // Check if the user is currently in lockout time
+        if (user && user.lockout_time && user.lockout_time > currentTime) {
+            logger.log(LOGINFO.USER_FOUND.replace("{phoneNo}", phoneNo));
+            return ErrorResponse(
+                HTTP_STATUS_CODE.FORBIDDEN,
+                `${USERMODULE.ACCOUNT_DEACTIVATED} Try after ${user.lockout_time}`
+            );
         }
-     
+        logger.log(LOGINFO.USER_NOT_LOCKED_OUT.replace("{phoneNo}", phoneNo));
+
+
+        const check_otp_limit = await validateUserOTPLimit(phoneNo)
+        if (check_otp_limit instanceof Response) {
+            return check_otp_limit;
+        }
         // Attempt to send OTP
+
+        console.log("Start of getting Otp setting Data---------------");
         const { data: _data, error } = await sendOtp(phoneNo);
 
         if (error) {
             // Log error if OTP sending fails
             logger.error(LOGERROR.OTP_SEND_ERROR + error);
             return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, `${error}`);
-        } else {
-            if (user) {
-                const {data:_otpRequest,error}= await insertOtpRequest(user.user_id,new Date())
-                if(error)
-                {
-                    return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR,"some thing went wrong:"+error.message,)
-                }                
-            }
-
-            // Log success when OTP is sent successfully
-            logger.log(LOGINFO.OTP_SENT_SUCCESS.replace("{phoneNo}", phoneNo));
-            return SuccessResponse(USERMODULE.SENT_OTP_SUCCESS, HTTP_STATUS_CODE.OK);
         }
+        const { data: _otpRequest, error: insertOtpRequestError } = await insertOtpRequest(phoneNo, new Date())
+        if (insertOtpRequestError) {
+            return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, "some thing went wrong:" + error.message,)
+        }
+        // Log success when OTP is sent successfully
+        logger.log(LOGINFO.OTP_SENT_SUCCESS.replace("{phoneNo}", phoneNo));
+        return SuccessResponse(USERMODULE.SENT_OTP_SUCCESS, HTTP_STATUS_CODE.OK);
+
     } catch (error) {
         // Log and return a generic error for any unhandled exceptions
         logger.error(LOGERROR.INTERNAL_SERVER_ERROR + error);

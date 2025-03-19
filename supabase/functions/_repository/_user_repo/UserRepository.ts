@@ -4,6 +4,7 @@ import { TABLE_NAMES } from "@shared/_db_table_details/TableNames.ts";
 import { OTP_LIMITS_TABLE_FIELDS, OTP_REQUEST_TABLE_FIELDS, OTP_SETTINGS_TABLE_FIELDS, USER_TABLE_FIELDS } from "@shared/_db_table_details/UserTableFields.ts";
 
 
+
 /**
  * this method is used to Fetch User profile  based on the user_Id
  *
@@ -33,8 +34,6 @@ export async function getUser(phoneNo: string): Promise<{ data: any, error: any 
     .eq(USER_TABLE_FIELDS.MOBILE, phoneNo)  // .or(`lockout_time.lt.${new Date().toISOString()},lockout_time.is.null`)
     .maybeSingle();
   return { data, error };
-
-
 }
 
 /**
@@ -366,14 +365,15 @@ async function generateFileHash(file: File): Promise<string> {
  * @param {number} id - The ID of the OTP settings to be updated.
  * @returns {Promise<{data:any,error:any}>} - The result of the update operation.
  */
-export async function updateOtpLimitSettings(time_units: string, time_units_count: number, max_OTP: number, id: number): Promise<{ data: any, error: any }> {
+export async function updateOtpLimitSettings(time_units: string, time_units_count: number, max_OTP: number, id: string): Promise<{ data: any, error: any }> {
   const { data, error } = await supabase
     .from(TABLE_NAMES.OTP_SETTINGS_TABLE)
     .update([
       {
         [OTP_SETTINGS_TABLE_FIELDS.TIME_UNIT]: time_units,
         [OTP_SETTINGS_TABLE_FIELDS.TIME_UNITS_COUNT]: time_units_count,
-        [OTP_SETTINGS_TABLE_FIELDS.MAX_OTP_ATTEMPTS]: max_OTP
+        [OTP_SETTINGS_TABLE_FIELDS.MAX_OTP_ATTEMPTS]: max_OTP,
+        [OTP_LIMITS_TABLE_FIELDS.CRITERIA_STATUS]:'active'
       }])
     .eq(OTP_SETTINGS_TABLE_FIELDS.ID, id)
     .select();
@@ -408,19 +408,26 @@ export async function addOTPEntry(user_id: string): Promise<{ data: any, error: 
  * @param {Date} end_time - The end time to count OTP requests to.
  * @returns {Promise<{count:number,error:any}>} - The result of the count operation.
  */
-export async function countOtpRequests(user_id: string, start_time: Date, end_time: Date): Promise<{ count: any, error: any }> {
+export async function countOtpRequests(phoneNo: string, start_time: Date, end_time: Date): Promise<{ count: any, error: any }> {
   const startTimeISO = start_time.toISOString();
   const endTimeISO = end_time.toISOString();
+
+  // const { count, error } = await supabase
+  //   .from(TABLE_NAMES.OTP_REQUEST_TABLE)
+  //   .select("*", { count: "exact", head: true })
+  //   // .gte("requested_at", '2025-03-19 00:00:00')
+  //   // .lte("requested_at", '2025-03-19 23:59:59' )
+  //   .gte(OTP_REQUEST_TABLE_FIELDS.OTP_REQUESTED_AT, startTimeISO) // Filter from start time
+  //   .lte(OTP_REQUEST_TABLE_FIELDS.OTP_REQUESTED_AT, endTimeISO)
+  //   .eq(OTP_REQUEST_TABLE_FIELDS.PHONE_NUMBER, phoneNo); // Filter up to end time
 
   const { count, error } = await supabase
     .from(TABLE_NAMES.OTP_REQUEST_TABLE)
     .select("*", { count: "exact", head: true })
-    // .gte("requested_at", '2025-03-19 00:00:00')
-    // .lte("requested_at", '2025-03-19 23:59:59' )
-    .gte(OTP_REQUEST_TABLE_FIELDS.OTP_REQUESTED_AT, startTimeISO) // Filter from start time
+    .gte(OTP_REQUEST_TABLE_FIELDS.OTP_REQUESTED_AT, startTimeISO) // Use ISO format
     .lte(OTP_REQUEST_TABLE_FIELDS.OTP_REQUESTED_AT, endTimeISO)
-    .eq(OTP_REQUEST_TABLE_FIELDS.USER_ID, user_id); // Filter up to end time
-  console.log("data" + count + " error:" + error)
+    .eq(OTP_REQUEST_TABLE_FIELDS.PHONE_NUMBER, phoneNo);
+  console.log("data" + count + " error:" + error?.message)
   return { count, error };
 }
 
@@ -432,8 +439,8 @@ export async function getOtpSettings(): Promise<{ data: any, error: any }> {
   const { data, error } = await supabase
     .from(TABLE_NAMES.OTP_SETTINGS_TABLE)
     .select("*")
-    .eq(OTP_SETTINGS_TABLE_FIELDS.ID, 4)
-    .single();
+    .eq(OTP_SETTINGS_TABLE_FIELDS.CEITERIA_STATUS, "active")
+    .maybeSingle();
 
   console.log(data);
   return { data, error }
@@ -447,7 +454,7 @@ export async function insertOtpRequest(user_id: string, currentDate: Date): Prom
     .from(TABLE_NAMES.OTP_REQUEST_TABLE)
     .insert([{
       [OTP_REQUEST_TABLE_FIELDS.OTP_REQUESTED_AT]: currentDate,
-      [OTP_REQUEST_TABLE_FIELDS.USER_ID]: user_id
+      [OTP_REQUEST_TABLE_FIELDS.PHONE_NUMBER]: user_id
     }]).maybeSingle();
   return { data, error };
 }
