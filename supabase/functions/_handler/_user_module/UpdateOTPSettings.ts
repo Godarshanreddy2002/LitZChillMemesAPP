@@ -9,28 +9,21 @@ import { updateOtpLimitSettings } from "@repository/_user_repo/UserRepository.ts
 export async function updateOTPSettings(req: Request, _params: Record<string, string>):Promise<Response> 
 {
     try{
-        const url = new URL(req.url);
-
-        // const hours = parseInt(url.searchParams.get("hours")||"0");
-        // const minutes = parseInt(url.searchParams.get("minutes")||"0");
-        // const days = parseInt(url.searchParams.get("days")||"1");
-        // const max_OTP= parseInt(url.searchParams.get("max_OTP")||"15");
-        const time_units = url.searchParams.get("time_unit");
-        const time_units_count = parseInt(url.searchParams.get("time_units_count")||"0");
-        const max_OTP= parseInt(url.searchParams.get("max_OTP")||"15");
-        if(!time_units)
+                const url = new URL(req.url);
+        const time_units = url.searchParams.get("time_unit")||"days";
+        const time_units_count:number = parseInt(url.searchParams.get("time_units_count")||"1");
+        const max_OTP:number = parseInt(url.searchParams.get("max_otp_count")||"15");
+        if(time_units_count<0 ||max_OTP<0)
         {
-            console.log("time_units_count"+time_units_count)
-            return ErrorResponse(HTTP_STATUS_CODE.BAD_REQUEST,"time units are required");
+            return ErrorResponse(HTTP_STATUS_CODE.BAD_REQUEST,"time units and max otp count should be greater than 0");
         }
 
-        
-        // const currentTime = new Date();
-        // currentTime.setHours(currentTime.getHours() + hours);
-        // currentTime.setMinutes(currentTime.getMinutes() + minutes);
-        // currentTime.setDate(currentTime.getDate() + days);
-
-        const {data,error} =await updateOtpLimitSettings(time_units,time_units_count,max_OTP,5);
+        const allowedTimeUnits = ["days", "min", "hours"]; 
+        if (!allowedTimeUnits.includes(time_units))
+        {
+            return ErrorResponse(HTTP_STATUS_CODE.BAD_REQUEST,USERMODULE.ALLOWED_TIME_UNITS);
+        }
+        const {data,error} =await updateOtpLimitSettings(time_units,time_units_count,max_OTP,4);
         if(error)
         {
             console.log("error at updating ",error.message)
@@ -44,7 +37,7 @@ export async function updateOTPSettings(req: Request, _params: Record<string, st
 
         return SuccessResponse(USERMODULE.OTP_SETTINGS_UPDATE_SUCCESSE,HTTP_STATUS_CODE.OK); // Return error response
     }
-    catch(error){
+    catch(_error){
         return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, `${USERMODULE.INTERNAL_SERVER_ERROR}`); // Return error response
     }
     

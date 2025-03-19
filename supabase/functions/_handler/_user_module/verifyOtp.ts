@@ -4,7 +4,7 @@ import { makeUserLockout } from "@repository/_user_repo/UserRepository.ts";
 import { USERMODULE } from "@shared/_messages/userModuleMessages.ts";
 import { HTTP_STATUS_CODE } from "@shared/_constants/HttpStatusCodes.ts";
 import ErrorResponse, { SuccessResponse } from "@response/Response.ts";
-import { isOtpAvailable, isPhoneAvailable } from "@shared/_validation/UserValidate.ts";
+import {  isOtpisValid, isPhoneValid } from "@shared/_validation/UserValidate.ts";
 import { LOGERROR } from "@shared/_messages/userModuleMessages.ts";
 import { LOGINFO } from "@shared/_messages/userModuleMessages.ts";
 import Logger from "@shared/_logger/Logger.ts";
@@ -34,12 +34,12 @@ export default async function verifyOtp(req: Request): Promise<Response> {
         const Otp: string = body.Otp;
 
         // Validate phone number format and existence
-        const validPhone = isPhoneAvailable(phoneNo);
+        const validPhone = isPhoneValid(phoneNo);
         if (validPhone instanceof Response)
             return validPhone;
 
         // Validate OTP format
-        const validOtp = isOtpAvailable(Otp);
+        const validOtp = isOtpisValid(Otp);
         if (validOtp instanceof Response)
             return validOtp;
 

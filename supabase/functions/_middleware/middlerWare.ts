@@ -43,6 +43,8 @@ export const checkUserAuthentication = function checkUserAuthentication(
  
             // Getting user details from users table by id
             const id = userData.user.id;
+            console.log("User id: ", id);
+
             const { data, error } = await supabase
                 .from("users")
                 .select('account_status,lockout_time,user_type')

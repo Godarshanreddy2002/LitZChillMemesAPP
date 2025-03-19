@@ -3,8 +3,8 @@ import { USERMODULE } from "@shared/_messages/userModuleMessages.ts";
 import { HTTP_STATUS_CODE } from "@shared/_constants/HttpStatusCodes.ts";
 import { SuccessResponse } from "@response/Response.ts";
 import ErrorResponse from "@response/Response.ts";
-import { countOtpRequests, getOtpSettings, getUser, getUserOtpDetails, insertOtpRequest, updateOtpLimitTable } from "@repository/_user_repo/UserRepository.ts";
-import { isPhoneAvailable } from "@shared/_validation/UserValidate.ts";
+import { countOtpRequests, getOtpSettings, getUser, insertOtpRequest } from "@repository/_user_repo/UserRepository.ts";
+import {  isPhoneValid } from "@shared/_validation/UserValidate.ts";
 import { LOGERROR, LOGINFO } from "@shared/_messages/userModuleMessages.ts";
 import Logger from "@shared/_logger/Logger.ts";
 import supabase from "@shared/_config/DbConfig.ts";
@@ -32,7 +32,8 @@ export default async function signInWithOtp(req: Request): Promise<Response> {
         logger.log(LOGINFO.OTP_SEND_STARTED.replace("{phoneNo}", phoneNo));
 
         // Validate if the phone number exists in the system
-        const phoneNoIsnotThere = isPhoneAvailable(phoneNo);
+        // need to change the method name
+        const phoneNoIsnotThere = isPhoneValid(phoneNo);
         if (phoneNoIsnotThere instanceof Response) {
             return phoneNoIsnotThere;
         }
@@ -48,7 +49,7 @@ export default async function signInWithOtp(req: Request): Promise<Response> {
             logger.error(LOGERROR.USER_NOT_FOUND + userError.message);
             return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, `${userError.message}`);
         }
-        // console.log(user.user_id+"-------------"+userError)
+        
         
         if (user) {
             console.log("Start of getting Otp setting Data---------------")
@@ -66,14 +67,14 @@ export default async function signInWithOtp(req: Request): Promise<Response> {
             const {data,error:getOtpSettingError}=await getOtpSettings();
             if(getOtpSettingError)
             {
-                return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR,"Somthing went wrong in getting"+getOtpSettingError.message)
+                return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR,USERMODULE.INTERNAL_SERVER_ERROR+getOtpSettingError.message)
             }  
             if(data)        
             {
                 const time=new Date();
                 const max_Otp_count=data.max_otp_attempts;
-                const time_unit:string=data.time_unit;
-                const time_units_count:number=data.time_units_count;    
+                const time_unit:string=data.time_unit;// days or hours
+                const time_units_count:number=data.time_units_count;  //2 hours or 2 min   
                 console.log("current time"+time);
                 if(time_unit=="days")
                 {
@@ -95,7 +96,7 @@ export default async function signInWithOtp(req: Request): Promise<Response> {
                 {
                     return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR,"some thing went wrong"+error.message,)
                 }
-                if(count&&count>=max_Otp_count)
+                if(count&&count>=max_Otp_count) 
                 {
                     return ErrorResponse(HTTP_STATUS_CODE.CONFLICT,"You have reached maximum otp limit")
                 }
@@ -103,22 +104,6 @@ export default async function signInWithOtp(req: Request): Promise<Response> {
 
 
             logger.log(LOGINFO.USER_NOT_LOCKED_OUT.replace("{phoneNo}", phoneNo));
-
-            // // Fetch OTP details for the user
-            // const { data: otpData, error: otpError } = await getUserOtpDetails(user.user_id);
-            // if (otpError) {
-            //     // Log error if there is an issue with the OTP details
-            //     logger.error(LOGERROR.USER_OTP_TABLE_ERROR + otpError.message);
-            //     return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, `${otpError.message}`);
-            // }
-
-            // // Check if OTP limits have been exceeded
-            // if (otpData.total_otps_per_day >= 15) {
-            //     return ErrorResponse(HTTP_STATUS_CODE.FORBIDDEN, USERMODULE.OTP_LIMIT_EXCEDED);
-            // }
-            // if (otpData.total_otps_last_5_min >= 3) {
-            //     return ErrorResponse(HTTP_STATUS_CODE.FORBIDDEN, USERMODULE.OTP_LIMIT_FOR_FIVE_MINUTE);
-            // }
         }
      
         // Attempt to send OTP
@@ -130,36 +115,11 @@ export default async function signInWithOtp(req: Request): Promise<Response> {
             return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, `${error}`);
         } else {
             if (user) {
-                // Fetch OTP details again after sending OTP
-                const { data: otpData, error: otpError } = await getUserOtpDetails(user.user_id);
-                if (otpError) {
-                    logger.error(LOGERROR.USER_OTP_TABLE_ERROR + otpError.message);
-                    return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, `${otpError.message}`);
-                }
-
-                if (otpData) {
-                    // Update the OTP count in the database
-                    // const { data: _updateOtpLimit, error: updateOtpError } = await updateOtpLimitTable(
-                    //     user.user_id,
-                    //     otpData.total_otps_last_5_min + 1,
-                    //     otpData.total_otps_per_day + 1
-                    // );
-                    // if (updateOtpError) {
-                    //     return ErrorResponse(HTTP_STATUS_CODE.FORBIDDEN, USERMODULE.OTP_LIMIT_FOR_FIVE_MINUTE);
-                    // }
-
-
-                    const {data:_otpRequest,error}= await insertOtpRequest(user.user_id,new Date())
-
-
-                    if(error)
-                    {
-                        return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR,"some thing went wrong:"+error.message,)
-                    }
-
-
-                    
-                }
+                const {data:_otpRequest,error}= await insertOtpRequest(user.user_id,new Date())
+                if(error)
+                {
+                    return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR,"some thing went wrong:"+error.message,)
+                }                
             }
 
             // Log success when OTP is sent successfully

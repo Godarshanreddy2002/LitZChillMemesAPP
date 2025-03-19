@@ -9,7 +9,7 @@ import { V4 } from "@V4";
  * @param phone --It takes the phone number as parameter of type string
  * @returns --It returns Response Object or void 
  */
-export function isPhoneAvailable(phone:string):Response|null
+export function isPhoneValid(phone:string):Response|null
 {
     if(!phone)
     {
@@ -50,7 +50,7 @@ export function isPhoneAvailable(phone:string):Response|null
  * @param Otp -- I takes the OTP as a parameter of type string
  * @returns -- It returns Response Object or void
  */
-export  function isOtpAvailable(Otp:string):Response|null
+export  function isOtpisValid(Otp:string):Response|null
 {
     if(!Otp)
     {

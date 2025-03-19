@@ -22,7 +22,7 @@ export default async function fetchFollower(req: Request, params: Record<string,
 
 
         const url = new URL(req.url);
-        const page = parseInt(url.searchParams.get("page")||"0");
+        const page = parseInt(url.searchParams.get("page")||"1");
         const size = parseInt(url.searchParams.get("size")||"10");
 
         
