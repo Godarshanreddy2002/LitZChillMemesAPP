@@ -3,7 +3,7 @@ import { USERMODULE } from "@shared/_messages/userModuleMessages.ts";
 import { HTTP_STATUS_CODE } from "@shared/_constants/HttpStatusCodes.ts";
 import { SuccessResponse } from "@response/Response.ts";
 import ErrorResponse from "@response/Response.ts";
-import { countOtpRequests, getOtpSettings, getUser, getUserOtpDetails, updateOtpLimitTable } from "@repository/_user_repo/UserRepository.ts";
+import { countOtpRequests, getOtpSettings, getUser, getUserOtpDetails, insertOtpRequest, updateOtpLimitTable } from "@repository/_user_repo/UserRepository.ts";
 import { isPhoneAvailable } from "@shared/_validation/UserValidate.ts";
 import { LOGERROR, LOGINFO } from "@shared/_messages/userModuleMessages.ts";
 import Logger from "@shared/_logger/Logger.ts";
@@ -100,7 +100,7 @@ export default async function signInWithOtp(req: Request): Promise<Response> {
                     return ErrorResponse(HTTP_STATUS_CODE.CONFLICT,"You have reached maximum otp limit")
                 }
             }
-            
+
 
             logger.log(LOGINFO.USER_NOT_LOCKED_OUT.replace("{phoneNo}", phoneNo));
 
@@ -139,14 +139,26 @@ export default async function signInWithOtp(req: Request): Promise<Response> {
 
                 if (otpData) {
                     // Update the OTP count in the database
-                    const { data: _updateOtpLimit, error: updateOtpError } = await updateOtpLimitTable(
-                        user.user_id,
-                        otpData.total_otps_last_5_min + 1,
-                        otpData.total_otps_per_day + 1
-                    );
-                    if (updateOtpError) {
-                        return ErrorResponse(HTTP_STATUS_CODE.FORBIDDEN, USERMODULE.OTP_LIMIT_FOR_FIVE_MINUTE);
+                    // const { data: _updateOtpLimit, error: updateOtpError } = await updateOtpLimitTable(
+                    //     user.user_id,
+                    //     otpData.total_otps_last_5_min + 1,
+                    //     otpData.total_otps_per_day + 1
+                    // );
+                    // if (updateOtpError) {
+                    //     return ErrorResponse(HTTP_STATUS_CODE.FORBIDDEN, USERMODULE.OTP_LIMIT_FOR_FIVE_MINUTE);
+                    // }
+
+
+                    const {data:_otpRequest,error}= await insertOtpRequest(user.user_id,new Date())
+
+
+                    if(error)
+                    {
+                        return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR,"some thing went wrong:"+error.message,)
                     }
+
+
+                    
                 }
             }
 

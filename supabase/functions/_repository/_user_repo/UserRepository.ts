@@ -1,7 +1,7 @@
 import supabase from "@shared/_config/DbConfig.ts";
 import { UserProfile } from '@model/UserModel.ts';
 import { TABLE_NAMES } from "@shared/_db_table_details/TableNames.ts";
-import { OTP_LIMITS_TABLE_FIELDS, USER_TABLE_FIELDS } from "@shared/_db_table_details/UserTableFields.ts";
+import { OTP_LIMITS_TABLE_FIELDS, OTP_REQUEST_TABLE_FIELDS, OTP_SETTINGS_TABLE_FIELDS, USER_TABLE_FIELDS } from "@shared/_db_table_details/UserTableFields.ts";
 
 
 /**
@@ -396,24 +396,48 @@ export async function addOTPEntry(user_id:string)
 
 
 export async function countOtpRequests(user_id: string, start_time: Date, end_time: Date) {
+  const startTimeISO = start_time.toISOString(); 
+  const endTimeISO = end_time.toISOString();
+
   const { count, error } = await supabase
-    .from("otp_requests")
-    .select("*", { count: "exact", head: true }) // Get only count
-    .eq("user_id", user_id)
-    .gte("requested_at", start_time) // Filter from start time
-    .lte("requested_at", end_time).single(); // Filter up to end time
+  .from(TABLE_NAMES.OTP_REQUEST_TABLE)
+  .select("*", { count: "exact", head: true })
+  // .gte("requested_at", '2025-03-19 00:00:00')
+  // .lte("requested_at", '2025-03-19 23:59:59' )
+  .gte(OTP_REQUEST_TABLE_FIELDS.OTP_REQUESTED_AT, startTimeISO) // Filter from start time
+  .lte(OTP_REQUEST_TABLE_FIELDS.OTP_REQUESTED_AT, endTimeISO)
+  .eq(OTP_REQUEST_TABLE_FIELDS.USER_ID, user_id); // Filter up to end time
 console.log("data"+count+" error:"+error)
   return { count, error };
 }
 
 export async function getOtpSettings() {
   const { data, error } = await supabase
-  .from("otp_settings")
+  .from(TABLE_NAMES.OTP_SETTINGS_TABLE)
   .select("*")
-  .eq('id',4)
+  .eq(OTP_SETTINGS_TABLE_FIELDS.ID, 1)
   .single();
 
   console.log(data);
   return {data,error}
 
 }
+
+
+
+export async function insertOtpRequest(user_id:string,currentDate:Date):Promise<{data:any,error:any}>{
+  const {data,error}=await supabase
+  .from(TABLE_NAMES.OTP_REQUEST_TABLE) 
+  .insert([{
+    [OTP_REQUEST_TABLE_FIELDS.OTP_REQUESTED_AT]:currentDate,
+    [OTP_REQUEST_TABLE_FIELDS.USER_ID]:user_id
+  }]).maybeSingle();
+  return {data,error};
+  
+}
+
+
+
+
+
+

@@ -37,3 +37,17 @@ export const USER_TABLE_FIELDS = {
     TOTAL_OTPS_LAST_5_MIN: 'total_otps_last_5_min',
     LAST_UPDATED: 'last_updated',
   };
+
+
+  export const OTP_REQUEST_TABLE_FIELDS = {
+    USER_ID: 'user_id',
+    OTP_REQUESTED_AT: 'requested_at',
+  };
+
+  export const OTP_SETTINGS_TABLE_FIELDS = {
+    ID: 'id',
+    TIME_UNIT: 'time_unit',
+    TIME_UNITS_COUNT: 'time_units_count',
+    MAX_OTP_ATTEMPTS: 'max_otp_attempts',
+    LAST_UPDATED: 'last_updated',
+  };
