@@ -133,12 +133,6 @@ export default async function verifyOtp(req: Request): Promise<Response> {
                     logger.error(LOGERROR.USER_REGISTRATION_ERROR + registerError.message);
                     return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, `${USERMODULE.INTERNAL_SERVER_ERROR}`);
                 }
-
-                const { data: _CreateOtpDetails, error: createOtpDetailError } = await addOTPEntry(userId);
-                if (createOtpDetailError) {
-                    logger.error(LOGERROR.USER_REGISTRATION_ERROR + createOtpDetailError.message);
-                    return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, `${USERMODULE.INTERNAL_SERVER_ERROR}`);
-                }
                 return SuccessResponse(USERMODULE.SENT_OTP_SUCCESS, HTTP_STATUS_CODE.CREATED, { userId, access_token });
             }
         }

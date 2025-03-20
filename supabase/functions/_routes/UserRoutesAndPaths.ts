@@ -12,6 +12,7 @@ import addFollower from "../_handler/_user_module/AddFollower.ts";
 import fetchFollower from "../_handler/_user_module/FetchFollower.ts";
 import updateProfilePhoto from "@handler/_user_module/UpdateProfilePhoto.ts";
 import { updateOTPSettings } from "@handler/_user_module/UpdateOTPSettings.ts";
+import createOTPSettings from "@handler/_user_module/CreateOTPSettings.ts";
 
 // Mapping all the routes in one place
 export const USER_MODULE_ROUTESs = {
@@ -32,6 +33,11 @@ export const USER_MODULE_ROUTESs = {
             USER_ROLES.ADMIN_ROLE,
             USER_ROLES.MEMER_ROLE,
             USER_ROLES.USER_ROLE,
+        ]
+    ),[USER_MODULE_ROUTES.CREATE_OTP_SETTINGS]:checkUserAuthentication(
+        createOTPSettings,
+        [
+            USER_ROLES.ADMIN_ROLE,
         ]
     ),
     [USER_MODULE_ROUTES.UPDATE_OTP_SETTINGS]:checkUserAuthentication(

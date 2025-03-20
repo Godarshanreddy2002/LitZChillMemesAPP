@@ -146,6 +146,28 @@ export async function validateUserOTPLimit(phoneNo: string) {
 
 }
 
-export async function validateRequestOTPSettingsData(url: URL) {
+export async function validateRequestOTPSettingsData(req: Request):Promise<{time_units:string,time_units_count:number,max_OTP:number}|Response> {
+
+    try{
+        const url = new URL(req.url);
+        const time_units = url.searchParams.get("time_unit")||"days";    
+        const time_units_count:number = parseInt(url.searchParams.get("time_units_count")||"1");
+        const max_OTP:number = parseInt(url.searchParams.get("max_otp_count")||"15");
+        if(time_units_count<0 ||max_OTP<0)
+        {
+            return ErrorResponse(HTTP_STATUS_CODE.BAD_REQUEST,"time units and max otp count should be greater than 0");
+        }    
+        const allowedTimeUnits = ["days", "min", "hours"]; 
+        if (!allowedTimeUnits.includes(time_units))
+        {
+            return ErrorResponse(HTTP_STATUS_CODE.BAD_REQUEST,USERMODULE.ALLOWED_TIME_UNITS);
+        }
+        return {time_units:time_units,time_units_count:time_units_count,max_OTP:max_OTP};
+
+
+    }
+    catch(error){
+        return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, "Some tghing went wrong: " + error)
+    }   
     
 }

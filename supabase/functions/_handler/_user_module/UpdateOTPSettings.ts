@@ -22,7 +22,7 @@ export async function updateOTPSettings(req: Request, params: Record<string, str
 
         if(ivalid_uuid instanceof Response)
         {
-            return isValid_uuid;
+            return ivalid_uuid;
         }
         if(time_units_count<0 ||max_OTP<0)
         {

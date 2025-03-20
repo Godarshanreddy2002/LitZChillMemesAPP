@@ -496,3 +496,18 @@ export async function insertOtpRequest(user_id: string, currentDate: Date): Prom
 //       );
 //   }
 // };
+
+
+export async function createOtpSettings(time_units: string, time_units_count: number, max_OTP: number): Promise<{ data: any, error: any }> {
+  const { data, error } = await supabase
+    .from(TABLE_NAMES.OTP_SETTINGS_TABLE)
+    .insert([
+      {
+        [OTP_SETTINGS_TABLE_FIELDS.TIME_UNIT]: time_units,
+        [OTP_SETTINGS_TABLE_FIELDS.TIME_UNITS_COUNT]: time_units_count,
+        [OTP_SETTINGS_TABLE_FIELDS.MAX_OTP_ATTEMPTS]: max_OTP,
+        [OTP_LIMITS_TABLE_FIELDS.CRITERIA_STATUS]:'active'
+      }])   
+    .maybeSingle();
+  return { data, error }
+}

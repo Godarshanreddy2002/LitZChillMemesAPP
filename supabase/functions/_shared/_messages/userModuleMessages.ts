@@ -48,7 +48,8 @@ export const USERMODULE = {
     PHOTO_UPLOAD_FAILED: "Failed to upload the photo. Please try again.",
     OTP_SETTINGS_UPDATE_SUCCESSE:"OTP settings updated succeessfully",
     ALLOWED_TIME_UNITS:"Allowed time units are 'days', 'min', 'hours' only",
-    CRITERIA_ID_NOT_FOUND:"Criteria not found to update"
+    CRITERIA_ID_NOT_FOUND:"Criteria not found to update",
+    OTP_SETTINGS_CREATED_SUCCESSFULLY:"OTP settings created successfully",
 };
 export const CONSTANTS = {
     COUNTRY_CODE: "+91",
