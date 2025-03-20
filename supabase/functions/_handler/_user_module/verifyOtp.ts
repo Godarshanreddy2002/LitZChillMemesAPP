@@ -1,5 +1,5 @@
 import { otpVerication } from "@repository/_user_repo/AuthRepo.ts";
-import { addOTPEntry, createOtpLimitTable, getUser, RegisterUser } from "@repository/_user_repo/UserRepository.ts";
+import {  getUser, RegisterUser } from "@repository/_user_repo/UserRepository.ts";
 import { makeUserLockout } from "@repository/_user_repo/UserRepository.ts";
 import { USERMODULE } from "@shared/_messages/userModuleMessages.ts";
 import { HTTP_STATUS_CODE } from "@shared/_constants/HttpStatusCodes.ts";
@@ -8,7 +8,7 @@ import {  isOtpisValid, isPhoneValid } from "@shared/_validation/UserValidate.ts
 import { LOGERROR } from "@shared/_messages/userModuleMessages.ts";
 import { LOGINFO } from "@shared/_messages/userModuleMessages.ts";
 import Logger from "@shared/_logger/Logger.ts";
-import supabase from "@shared/_config/DbConfig.ts";
+
 
 const logger = Logger.getInstance();
 

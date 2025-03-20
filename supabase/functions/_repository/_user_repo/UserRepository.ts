@@ -215,6 +215,7 @@ export async function getFollowers(user_id: string, page: number, size: number):
     .from('followers')
     .select(`*,users(first_name)`)
     .eq('user_id', user_id)
+    .order('created_at', { ascending: false }) 
     .range(page, size)
   // .limit(size);  
 
