@@ -31,7 +31,7 @@ export async function getUser(phoneNo: string): Promise<{ data: any, error: any 
   const { data, error } = await supabase
     .from(TABLE_NAMES.USER_TABLE)
     .select("*")
-    .eq(USER_TABLE_FIELDS.MOBILE, phoneNo)  // .or(`lockout_time.lt.${new Date().toISOString()},lockout_time.is.null`)
+    .eq(USER_TABLE_FIELDS.MOBILE, phoneNo)  .or(`lockout_time.lt.${new Date().toISOString()},lockout_time.is.null`)
     .maybeSingle();
   return { data, error };
 }
@@ -511,4 +511,21 @@ export async function createOtpSettings(time_units: string, time_units_count: nu
       }])   
     .maybeSingle();
   return { data, error }
+}
+
+
+
+/**
+ * Deletes an OTP limit setting entry from the OTP settings table based on the given criteria ID.
+ * @param {string} criteria_id - The ID of the OTP setting to be deleted.
+ * @returns {Promise<{data:any,error:any}>} - The result of the delete operation.
+ */
+
+export async function deleteOtpLimitSettings(criteria_id:string) {
+  const { data, error } = await supabase
+    .from(TABLE_NAMES.OTP_SETTINGS_TABLE)
+    .delete()
+    .eq(OTP_SETTINGS_TABLE_FIELDS.ID, criteria_id)
+    .neq(OTP_SETTINGS_TABLE_FIELDS.CEITERIA_STATUS, "active") 
+  return { data, error }  
 }

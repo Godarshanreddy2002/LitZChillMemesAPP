@@ -2,7 +2,7 @@ import { USERMODULE } from "@shared/_messages/userModuleMessages.ts";
 import { HTTP_STATUS_CODE } from "@shared/_constants/HttpStatusCodes.ts";
 import ErrorResponse, { SuccessResponse } from "@response/Response.ts";
 import { updateOtpLimitSettings } from "@repository/_user_repo/UserRepository.ts";
-import { validateRequestOTPSettingsData, validatingUserId } from "@shared/_validation/UserValidate.ts";
+import { isPhoneValid, validateRequestOTPSettingsData, validatingUserId } from "@shared/_validation/UserValidate.ts";
 
 /**
  * Updates the OTP settings for a given ID in the OTP settings table.
@@ -15,7 +15,11 @@ export async function updateOTPSettings(req: Request, params: Record<string, str
     try{
 
         const criteria_id:string=params.id;
-        
+        const idAvailable = await validatingUserId(criteria_id);
+        if (idAvailable instanceof Response) {
+           
+            return idAvailable; // Return an error response if validation fails
+        }
         const requestData=  await validateRequestOTPSettingsData(req);
         if(requestData instanceof Response)
         {

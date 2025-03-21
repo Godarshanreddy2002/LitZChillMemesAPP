@@ -51,6 +51,8 @@ export const USERMODULE = {
     CRITERIA_ID_NOT_FOUND:"Criteria not found to update",
     OTP_SETTINGS_CREATED_SUCCESSFULLY:"OTP settings created successfully",
     OTP_SETTINGS_NOT_FOUND:"OTP settings not found",
+    OTP_SETTINGS_DELETED_SUCCESSFULLY:"OTP settings deleted successfully",
+    CRITERIA_ID_NOT_FOUND_OR_ACTIVE:"Criteria not found or active",
 };
 export const CONSTANTS = {
     COUNTRY_CODE: "+91",

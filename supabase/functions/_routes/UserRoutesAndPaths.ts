@@ -1,4 +1,4 @@
-import logoutUser from "../_handler/_user_module/Logout.ts";  
+import logoutUser from "../_handler/_user_module/Logout.ts";
 import signInWithOtp from "../_handler/_user_module/SendOTP.ts";
 import verifyOtp from "../_handler/_user_module/verifyOtp.ts";
 import { HTTP_METHOD } from "../_shared/_constants/HttpMethods.ts";
@@ -13,83 +13,92 @@ import fetchFollower from "../_handler/_user_module/FetchFollower.ts";
 import updateProfilePhoto from "@handler/_user_module/UpdateProfilePhoto.ts";
 import { updateOTPSettings } from "@handler/_user_module/UpdateOTPSettings.ts";
 import createOTPSettings from "@handler/_user_module/CreateOTPSettings.ts";
+import { DeleteOTPSettingsCriteria } from "@handler/_user_module/DeleteOTPSettingsCriteria.ts";
 
 // Mapping all the routes in one place
 export const USER_MODULE_ROUTESs = {
-  [HTTP_METHOD.POST]: {
-    [USER_MODULE_ROUTES.SEND_OTP]: signInWithOtp,
-    [USER_MODULE_ROUTES.VERIFY_OTP]: verifyOtp,
-    [USER_MODULE_ROUTES.USER_LOGOUT]: checkUserAuthentication(
-        logoutUser,
-        [
-            USER_ROLES.ADMIN_ROLE, 
-            USER_ROLES.USER_ROLE,
-            USER_ROLES.MEMER_ROLE,
-        ]
-    ),
-    [USER_MODULE_ROUTES.ADD_FOLLOWER]:checkUserAuthentication(
-        addFollower,
-        [
-            USER_ROLES.ADMIN_ROLE,
-            USER_ROLES.MEMER_ROLE,
-            USER_ROLES.USER_ROLE,
-        ]
-    ),[USER_MODULE_ROUTES.CREATE_OTP_SETTINGS]:checkUserAuthentication(
-        createOTPSettings,
-        [
-            USER_ROLES.ADMIN_ROLE,
-        ]
-    ),
-    [USER_MODULE_ROUTES.UPDATE_OTP_SETTINGS]:checkUserAuthentication(
-        updateOTPSettings,
-        [
-            USER_ROLES.ADMIN_ROLE,
-        ]
-    )
-},
-[HTTP_METHOD.PATCH]:{
-    [USER_MODULE_ROUTES.UPDATE_USER]:checkUserAuthentication(
-        updateUserProfile,
-        [
-            USER_ROLES.ADMIN_ROLE,
-            USER_ROLES.MEMER_ROLE,
-            USER_ROLES.USER_ROLE
-            
-        ]
-    ),
-    [USER_MODULE_ROUTES.ACTIVATE_OR_DEACTIVATE_USER]:checkUserAuthentication(
-        ActivateOrDeactivateUser,
-        [
-            USER_ROLES.ADMIN_ROLE,
-            USER_ROLES.MEMER_ROLE,
-            USER_ROLES.USER_ROLE
-        ]
-    ),
-    [USER_MODULE_ROUTES.UPDATE_PHOTO]:checkUserAuthentication(
-        updateProfilePhoto,
-        [
-            USER_ROLES.ADMIN_ROLE,
-            USER_ROLES.MEMER_ROLE,
-            USER_ROLES.USER_ROLE
-        ]
-    )
-},
-[HTTP_METHOD.GET]:{
-    [USER_MODULE_ROUTES.FETCH_USER]:checkUserAuthentication(
-        FetchUserProfile,
-        [
-            USER_ROLES.ADMIN_ROLE,
-            USER_ROLES.MEMER_ROLE,
-            USER_ROLES.USER_ROLE
-        ]
-    )
-    , [USER_MODULE_ROUTES.FETCH_FOLLOWERS]:checkUserAuthentication(
-        fetchFollower,
-        [
-            USER_ROLES.ADMIN_ROLE,
-            USER_ROLES.MEMER_ROLE,
-            USER_ROLES.USER_ROLE
-        ]
-    )
-}
+    [HTTP_METHOD.POST]: {
+        [USER_MODULE_ROUTES.SEND_OTP]: signInWithOtp,
+        [USER_MODULE_ROUTES.VERIFY_OTP]: verifyOtp,
+        [USER_MODULE_ROUTES.USER_LOGOUT]: checkUserAuthentication(
+            logoutUser,
+            [
+                USER_ROLES.ADMIN_ROLE,
+                USER_ROLES.USER_ROLE,
+                USER_ROLES.MEMER_ROLE,
+            ]
+        ),
+        [USER_MODULE_ROUTES.ADD_FOLLOWER]: checkUserAuthentication(
+            addFollower,
+            [
+                USER_ROLES.ADMIN_ROLE,
+                USER_ROLES.MEMER_ROLE,
+                USER_ROLES.USER_ROLE,
+            ]
+        ), [USER_MODULE_ROUTES.CREATE_OTP_SETTINGS]: checkUserAuthentication(
+            createOTPSettings,
+            [
+                USER_ROLES.ADMIN_ROLE,
+            ]
+        ),
+        [USER_MODULE_ROUTES.UPDATE_OTP_SETTINGS]: checkUserAuthentication(
+            updateOTPSettings,
+            [
+                USER_ROLES.ADMIN_ROLE,
+            ]
+        )
+    },
+    [HTTP_METHOD.PATCH]: {
+        [USER_MODULE_ROUTES.UPDATE_USER]: checkUserAuthentication(
+            updateUserProfile,
+            [
+                USER_ROLES.ADMIN_ROLE,
+                USER_ROLES.MEMER_ROLE,
+                USER_ROLES.USER_ROLE
+
+            ]
+        ),
+        [USER_MODULE_ROUTES.ACTIVATE_OR_DEACTIVATE_USER]: checkUserAuthentication(
+            ActivateOrDeactivateUser,
+            [
+                USER_ROLES.ADMIN_ROLE,
+                USER_ROLES.MEMER_ROLE,
+                USER_ROLES.USER_ROLE
+            ]
+        ),
+        [USER_MODULE_ROUTES.UPDATE_PHOTO]: checkUserAuthentication(
+            updateProfilePhoto,
+            [
+                USER_ROLES.ADMIN_ROLE,
+                USER_ROLES.MEMER_ROLE,
+                USER_ROLES.USER_ROLE
+            ]
+        )
+    },
+    [HTTP_METHOD.GET]: {
+        [USER_MODULE_ROUTES.FETCH_USER]: checkUserAuthentication(
+            FetchUserProfile,
+            [
+                USER_ROLES.ADMIN_ROLE,
+                USER_ROLES.MEMER_ROLE,
+                USER_ROLES.USER_ROLE
+            ]
+        )
+        , [USER_MODULE_ROUTES.FETCH_FOLLOWERS]: checkUserAuthentication(
+            fetchFollower,
+            [
+                USER_ROLES.ADMIN_ROLE,
+                USER_ROLES.MEMER_ROLE,
+                USER_ROLES.USER_ROLE
+            ]
+        )
+    },
+    [HTTP_METHOD.DELETE]: {
+        [USER_MODULE_ROUTES.DELETE_OTP_SETTINGS]: checkUserAuthentication(
+            DeleteOTPSettingsCriteria,
+            [
+                USER_ROLES.ADMIN_ROLE,
+            ]
+        )
+    }
 }

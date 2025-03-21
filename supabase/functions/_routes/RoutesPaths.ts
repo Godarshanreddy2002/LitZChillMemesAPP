@@ -10,7 +10,8 @@ export const USER_MODULE_ROUTES = {
     FETCH_FOLLOWERS:"/UserModule/fetchFollowers",
     UPDATE_PHOTO:"/UserModule/UpdatePhoto/:id/:profile",
     CREATE_OTP_SETTINGS:"/UserModule/CreateOTPSettings",
-    UPDATE_OTP_SETTINGS:"/UserModule/UpdateOTPSettings/:id"
+    UPDATE_OTP_SETTINGS:"/UserModule/UpdateOTPSettings/:id",
+    DELETE_OTP_SETTINGS:"/UserModule/DeleteOTPSettings/:id"
   };
 //Meme Module Routes Path
 export const MEME_ROUTES ={
