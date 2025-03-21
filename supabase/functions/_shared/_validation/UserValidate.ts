@@ -109,6 +109,10 @@ export async function validateUserOTPLimit(phoneNo: string) {
         if (getOtpSettingError) {
             return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, USERMODULE.INTERNAL_SERVER_ERROR + getOtpSettingError.message)
         }
+
+        if (data==null) {
+            return ErrorResponse(HTTP_STATUS_CODE.NOT_FOUND, USERMODULE.OTP_SETTINGS_NOT_FOUND)
+        }
         if (data) {
             const time = new Date();
             const max_Otp_count = data.max_otp_attempts;

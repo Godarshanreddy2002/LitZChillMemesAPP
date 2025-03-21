@@ -31,8 +31,6 @@ export async function updateOTPSettings(req: Request, params: Record<string, str
         {
             return ErrorResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR,USERMODULE.INTERNAL_SERVER_ERROR)
         }
-
-
         return SuccessResponse(USERMODULE.OTP_SETTINGS_UPDATE_SUCCESSE,HTTP_STATUS_CODE.OK); // Return error response
     }
     catch(_error){

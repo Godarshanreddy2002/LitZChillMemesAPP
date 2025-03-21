@@ -50,6 +50,7 @@ export const USERMODULE = {
     ALLOWED_TIME_UNITS:"Allowed time units are 'days', 'min', 'hours' only",
     CRITERIA_ID_NOT_FOUND:"Criteria not found to update",
     OTP_SETTINGS_CREATED_SUCCESSFULLY:"OTP settings created successfully",
+    OTP_SETTINGS_NOT_FOUND:"OTP settings not found",
 };
 export const CONSTANTS = {
     COUNTRY_CODE: "+91",
